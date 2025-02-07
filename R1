@@ -1,37 +1,32 @@
-# Настройка GRE-over-IPsec
-## Router1
-### GRE Tunnel
+R1(config)#interface tunnel 0
+R1(config-if)#ip address 192.168.1.1 255.255.255.252
+R1(config-if)#tunnel source 1.1.1.1
+R1(config-if)#tunnel destination 2.2.2.1
+R1(config-if)#tunnel mode gre ip
+R1(config-if)#exit 
 
-interface Tunnel0                ! Создаем интерфейс для VPN-канала
-ip address 10.11.11.1 255.255.255.0  ! Назначаем IP-адрес
-tunnel mode gre ip              ! Задаем протокол GRE
-tunnel source Fa0/1             ! Указываем источник (порт)
-tunnel destination 217.11.72.2  ! Указываем адрес назначения
-Настройка OSPF
-cisco
-Копировать
-Редактировать
-router ospf 1
-network 10.10.10.0 0.0.0.255 area 0  ! Анонс внутренней сети
-network 10.11.11.0 0.0.0.255 area 0  ! Анонс сети туннеля Tunnel0
-passive-interface default            ! Все интерфейсы passive по умолчанию
-no passive-interface Tunnel0         ! Tunnel0 исключаем из passive
-Router2
-GRE Tunnel
-cisco
-Копировать
-Редактировать
-interface Tunnel0                ! Создаем интерфейс для VPN-канала
-ip address 11.11.11.2 255.255.255.0  ! Назначаем IP-адрес
-tunnel mode gre ip              ! Задаем протокол GRE
-tunnel source Fa0/1             ! Указываем источник (порт)
-tunnel destination 79.142.93.2  ! Указываем адрес назначения
-Настройка OSPF
-cisco
-Копировать
-Редактировать
-router ospf 1
-network 192.168.1.0 0.0.0.255 area 0  ! Анонс внутренней сети
-network 11.11.11.0 0.0.0.255 area 0   ! Анонс сети туннеля Tunnel0
-passive-interface default             ! Все интерфейсы passive по умолчанию
-no passive-interface Tunnel0          ! Tunnel0 исключаем из passive
+R1(config)#router ospf 1 
+R1(config-router)#network 192.168.1.0 255.255.255.252 area 1
+R1(config-router)#network 192.168.101.0 255.255.255.0 area 1
+R1(config-router)#passive-interface default 
+R1(config-router)#no passive-interface tunnel 0
+R1(config-router)#exit  
+
+R1(config)#crypto isakmp policy 1
+R1(config-isakmp)#authentication pre-share 
+R1(config-isakmp)#encryption aes  
+R1(config-isakmp)#hash sha
+R1(config-isakmp)#group 5
+R1(config-isakmp)#lifetime 1800
+R1(config-isakmp)#exit 
+R1(config)#crypto isakmp key canerce123 address 2.2.2.1
+R1(config)#crypto ipsec transform-set t-set esp-aes esp-sha-hmac 
+R1(cfg-crypto-trans)#mode tunnel 
+R1(cfg-crypto-trans)#exit 
+
+R1(config)#crypto ipsec profile test      
+R1(ipsec-profile)#set transform-set t-set
+R1(ipsec-profile)#exit 
+
+R1(config)#interface tunnel 0
+R1(config-if)#tunnel protection ipsec profile test

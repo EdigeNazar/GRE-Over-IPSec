@@ -1,1 +1,3 @@
-![image](https://github.com/user-attachments/assets/0fced4ac-be47-440a-9096-2c0eafcc7bbe)
+![Pasted image 20250107204956](https://github.com/user-attachments/assets/fb650f80-2daa-4a7e-bd32-8bc066aa7670)
+Данная конфигурация поднимает GRE-туннель между двумя маршрутизаторами, а также запускает динамическую маршрутизацию OSPF для обмена маршрутами между внутренними сетями.
+Tunnel0 защищён с помощью IPsec

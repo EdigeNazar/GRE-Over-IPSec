@@ -1,0 +1,32 @@
+R2(config)#interface tunnel 0
+R2(config-if)#ip address 192.168.1.2 255.255.255.252
+R2(config-if)#tunnel source 2.2.2.1
+R2(config-if)#tunnel destination 1.1.1.1
+R2(config-if)#tunnel mode gre ip
+R2(config-if)#exit 
+
+R2(config)#router ospf 1 
+R2(config-router)#network 192.168.1.0 255.255.255.252 area 1
+R2(config-router)#network 192.168.102.0 255.255.255.0 area 1
+R2(config-router)#passive-interface default 
+R2(config-router)#no passive-interface tunnel 0
+R2(config-router)#exit  
+
+R2(config)#crypto isakmp policy 1
+R2(config-isakmp)#authentication pre-share 
+R2(config-isakmp)#encryption aes 
+R2(config-isakmp)#hash sha
+R2(config-isakmp)#group 5
+R2(config-isakmp)#lifetime 1800
+R2(config-isakmp)#exit 
+
+R2(config)#crypto isakmp key canerce123 address 1.1.1.1
+R2(config)#crypto ipsec transform-set t-set esp-aes esp-sha-hmac 
+R2(cfg-crypto-trans)#mode tunnel 
+R2(cfg-crypto-trans)#exit 
+
+R2(config)#crypto ipsec profile test
+R2(ipsec-profile)#set transform-set t-set
+
+R2(ipsec-profile)#int t0
+R2(config-if)#tunnel protection ipsec profile test
